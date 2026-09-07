@@ -2,6 +2,7 @@ build/
 bin/
 out/
 cmake-build-*/
+tests/
 
 *.o
 *.obj
