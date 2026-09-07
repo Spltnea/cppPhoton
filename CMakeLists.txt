@@ -1,5 +1,5 @@
 cmake_minimum_required(VERSION 3.20)
-project(cppPhoton VERSION 0.1.0 LANGUAGES CXX)
+project(cppPhoton VERSION 0.1.0 LANGUAGES C CXX)
 
 set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
@@ -35,4 +35,4 @@ llvm_map_components_to_libnames(llvm_libs
     nativecodegen
 )
 
-target_link_libraries(mylang PRIVATE ${llvm_libs})
+target_link_libraries(cppPhoton PRIVATE ${llvm_libs})

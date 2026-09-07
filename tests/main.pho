@@ -1,0 +1,8 @@
+fn main() : void {
+    // Test
+    /* 
+        Test 2
+    */
+
+    let x = 10;
+}
