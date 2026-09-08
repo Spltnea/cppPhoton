@@ -27,8 +27,11 @@ int main(int argc, char** argv)
         return 0;
     }
     
-
-    // init compilation pipeline
+    /*
+        Init compilation pipeline 
+        A : Preprocessing Pass => transforms a .pho file to a .ppf file 
+        B : Lexing Pass => transforms a .ppf file to a stream of tokens of type tokenArray_t  
+    */
     photon::pPreprocessor preprocessor(argv[1]);
     photon::PreprocessResult preprocessingResult = preprocessor.applyPreprocessorPass();
 
@@ -36,6 +39,7 @@ int main(int argc, char** argv)
         std::cerr << "Compilation Errors Occured !";
         return 1;
     }
+
 
     photon::pLexer lexer(preprocessingResult.processedFilePath);
     lexer.applyLexerPass();
