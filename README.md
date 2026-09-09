@@ -1,6 +1,6 @@
 # The Photon Programming Language
 
-Photon is a programming language mainly aimed at low level to freestanding usages <br>
+Photon is a programming language mainly aimed towards low level to freestanding usages <br>
 It is the result of my dreams of ever making a programming language
 
 ## Why am i doing this project
@@ -55,8 +55,8 @@ cmake -B build
 # Build the compiler
 cmake --build build
 
-# Verify
-./build/cppPhoton --version
+# Test
+./build/cppPhoton <path/fileName.pho>
 ```
 
 ## Roadmap
@@ -76,6 +76,16 @@ The project will follow this roadmap, changes are subject to be made at any time
 
 I will add more entries here later
 
+## Releases and Updates
+This section will be updated when the compiler will see its first iteration <br>
+Look for the `changelog/DEVELOPEMENT` directory to see bits of compiler actions (this is where i'll place some documentation about the core components) <br>
+
+## Documentation
+Pre-Release Documentation will be contained in the `documentation` folder <br>
+It will be divided into multiple components : <br>
+1. `documentation/modules` This is where every module of the compiler will be explained in detail (code snippets, diagrams, and such)
+2. `documentation/concepts` Here i will share syntax concepts, mechanics, and so on, i might also place abstract algorithms on here, think of this as my ideas box i want to share
+3. `documentation/manual` I will write here the manual of this language
 
 ## AI Involvement
 I should mention that AI has been slightly used for the following things : <br>
@@ -83,7 +93,7 @@ I should mention that AI has been slightly used for the following things : <br>
 2. Small Code suggestions and optimizations (whether i refine and implement them or not)
 3. Configuration quirks fixing when i cannot find those
 
-The AI is not aware of this project and is instead giving me abstract examples i rewrite, refactor, and use for this code, otherwise, about 95% of the code is human written, i always resort to debugging, hand writting concepts and online documentation from the following sites before resorting to AI (and you should do that too): <br>
+The AI is not aware of this project and is instead giving me abstract examples i rewrite, refactor, and use for this code, otherwise, about 95% of the code is human written, i always resort to trial and error, debugging, hand writting concepts, my personal knowledge (albeit limited to basic concepts), and online documentation from the following sites before resorting to AI (and you should do that too): <br>
 
 1. https://www.cppreference.com/
 2. https://stackoverflow.com/questions
@@ -92,6 +102,6 @@ The AI is not aware of this project and is instead giving me abstract examples i
 
 ## Endnote
 As much as i'm having fun doing this project as a begginer (or not), i hope it will illuminate some heads and inspire them to do the same thing, talking to a processor is really fun <br>
-Thank you for following me on this journey and i shall thank myself for making this dream possible now that i have everything i need to do so <br>
+Thank you for following me on this journey and i shall thank myself for making this dream possible now that i have everything i need to do so :) <br>
 
 - Splittine

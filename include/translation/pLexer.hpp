@@ -21,28 +21,68 @@ namespace photon {
         // The path to the processed photon script file
         std::string ppfPath;
 
-        charVec_t::iterator index;
+        charVec_t::const_iterator index;
         
         // == Helpers ==
 
+        // Checks if the target offset is valid relative to buffer limits, returns false if the buffer is empty
+        bool isValidOffset(int offset) const {
+            if (buffer.empty()) return false;
+
+            // Absolute target index calculation
+            auto currentIndex = std::distance(buffer.begin(), index);
+            auto targetIndex = currentIndex + offset;
+
+            return targetIndex >= 0 && targetIndex < static_cast<std::ptrdiff_t>(buffer.size());
+        }
+
         // Asserts that the cursor has reached the end of stream
-        const bool isAtEnd(void) {
+        bool isAtEnd(void) const {
             return index == buffer.end();
         }
 
+        // Asserts that the given character is a new line
+        bool isNewLine(char& c) {
+            return (c == '\n');
+        }
+
+        // Asserts that the given character is a valid whitespace character (' ', \n, \f, \r, \t and \v)
+        bool isWhitespace(char& c) {
+            return std::isspace(static_cast<unsigned char>(c));
+        }
+
         // Returns the current element without advancing the index cursor
-        char currentElement(void) {
+        char currentElement(void) const {
             return *index;
         }
 
         // Returns the current element and advances the index cursor
-        char returnAndAdvance(void) {}
+        char returnAndAdvance(void) {
+            char current = currentElement();
+            std::advance(index, 1);
+            return current;
+        }
 
         // Returns the next element without advancing the index cursor
-        char nextElement(void) {}
+        char nextElement(void) const {
+            return *(index + 1);
+        }
 
         // Returns an element in stream relative to an offset, does not advances the index cursor
-        char elementAt(int offset) {}
+        // Returns a log frame and the null character if the position is invalid
+        char elementAt(int offset) const {
+            if (isValidOffset(offset)) {
+                return *(index + offset);
+            } else {
+                auto logFrame = pLogger::buildFrame(
+                    IdPrefix::LEXER_LOG, 
+                    SeverityPrefix::ERR, 0x03, 
+                    {"Error parsing the char vector, the target index goes out of bounds, returning '\\0'"}
+                );
+                pLogger::lprint(logFrame);
+                return '\0';
+            }
+        }
 
     public :
         /**
@@ -68,6 +108,11 @@ namespace photon {
             fileToProcess.seekg(0, std::ios::beg);
 
             buffer.resize(stsize);
+
+            if (stsize > 0) {
+                fileToProcess.read(buffer.data(), stsize);
+            }
+
             index = buffer.begin();
         }
 
