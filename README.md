@@ -29,10 +29,10 @@ sudo apt install -y llvm-dev clang cmake build-essential
 sudo dnf install -y llvm-devel llvm-static clang lld cmake gcc-c++
 
 # Arch Linux Systems
-sudo pacman -S llvm clang cmake ninja base-devel
+sudo pacman -S llvm clang cmake base-devel
 
 # macOS (Homebrew)
-brew install llvm cmake ninja
+brew install llvm cmake
 # Note: Homebrew does not symlink LLVM into PATH by default, so tell CMake where it is:
 export LLVM_DIR=$(brew --prefix llvm)/lib/cmake/llvm
 ```
