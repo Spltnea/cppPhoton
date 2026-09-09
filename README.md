@@ -23,10 +23,10 @@ Run the following command at the root directory using administrator privileges <
 ```bash
 # Ubuntu | Debian Based Systems
 sudo apt update
-sudo apt install -y llvm-dev clang cmake ninja-build build-essential
+sudo apt install -y llvm-dev clang cmake build-essential
 
 # Fedora Based Systems
-sudo dnf install -y llvm-devel llvm-static clang lld cmake ninja-build gcc-c++
+sudo dnf install -y llvm-devel llvm-static clang lld cmake gcc-c++
 
 # Arch Linux Systems
 sudo pacman -S llvm clang cmake ninja base-devel
@@ -50,7 +50,7 @@ Building the project involves a two step process i will later automate using scr
 
 ```bash
 # At the parent directory (cppPhoton/), execute
-cmake -B build -G Ninja
+cmake -B build
 
 # Build the compiler
 cmake --build build
