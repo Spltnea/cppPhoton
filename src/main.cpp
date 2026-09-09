@@ -6,7 +6,6 @@
 
 #include "translation/pPreprocessor.hpp"
 #include "translation/pLexer.hpp"
-#include "translation/pToken.hpp"
 
 int main(int argc, char** argv)
 {
@@ -30,8 +29,10 @@ int main(int argc, char** argv)
     /*
         Init compilation pipeline 
         A : Preprocessing Pass => transforms a .pho file to a .ppf file 
-        B : Lexing Pass => transforms a .ppf file to a stream of tokens of type tokenArray_t  
+        B : Lexing Pass => transforms a .ppf file to a stream of tokens of type tokenVec_t  
     */
+
+    // Preprocessor init
     photon::pPreprocessor preprocessor(argv[1]);
     photon::PreprocessResult preprocessingResult = preprocessor.applyPreprocessorPass();
 
@@ -40,18 +41,18 @@ int main(int argc, char** argv)
         return 1;
     }
 
-
-    photon::pLexer lexer(preprocessingResult.processedFilePath);
+    // Lexer init
+    photon::pLexer lexer(preprocessingResult);
     lexer.applyLexerPass();
 
-    photon::tokenArray_t tempArray = lexer.getTokens();
+    photon::tokenVec_t tempArray = lexer.getTokens();
     for (auto tok : tempArray) {
         std::cout   << "{TYPE : " << static_cast<int>(tok.type) 
                     << ", AT : {" << tok.lineNo << ", " << tok.colNo << "}"
                     << ", LEXEME : " << tok.lexeme << "\n";
     }
 
-    // init llvm modules
+    // Init llvm modules
     llvm::LLVMContext context;
     llvm::Module module("cppPhoton", context);
 

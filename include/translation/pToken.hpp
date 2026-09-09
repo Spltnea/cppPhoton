@@ -2,7 +2,6 @@
 #   define P_TOK_HPP
 
 #include <string>
-#include <vector>
 
 namespace photon {
 
@@ -28,9 +27,7 @@ namespace photon {
         TokenType type;
         std::string lexeme;
     };
-
-    using tokenArray_t = std::vector<Token>;
-}
+} // namespace photon
 
 
-#endif
+#endif // P_TOKEN_HPP

@@ -15,15 +15,16 @@ find_package(LLVM REQUIRED CONFIG)
 message(STATUS "Found LLVM ${LLVM_PACKAGE_VERSION}")
 message(STATUS "Using LLVMConfig.cmake in: ${LLVM_DIR}")
 
-include_directories(${LLVM_INCLUDE_DIRS})
-include_directories(include)
-add_definitions(${LLVM_DEFINITIONS})
-
-set(SOURCES
-    src/main.cpp
-)
+file(GLOB_RECURSE SOURCES "src/*.cpp")
 
 add_executable(cppPhoton ${SOURCES})
+
+target_include_directories(cppPhoton PRIVATE 
+    include 
+    ${LLVM_INCLUDE_DIRS}
+)
+
+add_definitions(${LLVM_DEFINITIONS})
 
 llvm_map_components_to_libnames(llvm_libs
     Core

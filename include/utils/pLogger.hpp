@@ -29,15 +29,15 @@ namespace photon {
     /** Provides small utilites to log compiler events when using the command line */
     class pLogger {
     private :
-        static const int getIdPrefixValueOf(IdPrefix prefix) {
+        static int getIdPrefixValueOf(IdPrefix prefix) {
             return static_cast<int>(prefix);
         }
 
-        static const int getSeverityPrefixValueOf(SeverityPrefix prefix) {
+        static int getSeverityPrefixValueOf(SeverityPrefix prefix) {
             return static_cast<int>(prefix);
         }
 
-        static const int buildID(IdPrefix id_prefix, SeverityPrefix sev_prefix, int eventCode) {
+        static int buildID(IdPrefix id_prefix, SeverityPrefix sev_prefix, int eventCode) {
             return getIdPrefixValueOf(id_prefix) | getSeverityPrefixValueOf(sev_prefix) | eventCode;
         }
 
@@ -49,19 +49,11 @@ namespace photon {
          * @param msg The associated msg
          * @return A clean event log to emit using the lprint() function
         */
-        static LogFrame buildFrame(IdPrefix logType, SeverityPrefix severity, int eventId, std::initializer_list<std::string> msg) {
-            int fullId = buildID(logType, severity, eventId);
-            std::string message = "";
-            for (auto str : msg) {
-                message += str;
-            }
-            return LogFrame {fullId, message, time(nullptr)};
-        }
+        static LogFrame 
+        buildFrame(IdPrefix logType, SeverityPrefix severity, int eventId, std::initializer_list<std::string> msg);
 
         /** Prints a log frame to the console */
-        static void lprint(const LogFrame& frame) {
-            std::cout << "[ " <<  ctime(&frame.timestamp) << "- (ID: 0x" << std::hex << frame.id << ") ] : " << std::dec << frame.message << '\n';
-        }
+        static void lprint(const LogFrame& frame);
     };
 }
 
