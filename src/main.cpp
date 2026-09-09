@@ -45,7 +45,7 @@ int main(int argc, char** argv)
     photon::pLexer lexer(preprocessingResult);
     lexer.applyLexerPass();
 
-    photon::tokenVec_t tempArray = lexer.getTokens();
+    photon::iterableBuffer tempArray = lexer.getTokens();
     for (auto tok : tempArray) {
         std::cout   << "{TYPE : " << static_cast<int>(tok.type) 
                     << ", AT : {" << tok.lineNo << ", " << tok.colNo << "}"
