@@ -32,7 +32,7 @@ namespace photon {
          * Asserts that the given character is a new line)
          * @param c The given character
         */
-        bool isNewLine(char& c) {
+        bool isNewLine(const char& c) {
             return (c == '\n');
         }
 
@@ -49,7 +49,7 @@ namespace photon {
          * @param c The given character
          * @param expectation The character to expect
          */
-        bool compare(char& c, char expectation) {
+        bool compare(const char& c, char expectation) {
             return (c == expectation);
         }
 
@@ -57,11 +57,11 @@ namespace photon {
          * Asserts that the given character is a letter
          * @param c The given character
          */
-        bool isLetter(char& c) {
+        bool isLetter(const char& c) {
             return std::isalpha(c);
         }
 
-        bool isSymbol(char& c) {
+        bool isSymbol(const char& c) {
             return (isItemPresentIn(c, symbols));
         }
 
@@ -77,7 +77,7 @@ namespace photon {
             char c = begin;
             lexeme += c;
             
-            while (!isWhitespace(charBuffer.currentElement()) && !isSymbol(c)) {
+            while (!isWhitespace(charBuffer.currentElement()) && !isSymbol(charBuffer.currentElement())) {
                 c = charBuffer.advance();
                 lexeme += c;
                 colNo++;
@@ -102,11 +102,15 @@ namespace photon {
 
             std::ifstream fileToProcess(ppfPath, std::ios::binary | std::ios::ate);
             if (!fileToProcess.is_open()) {
-                auto logFrame = pLogger::buildFrame(IdPrefix::LEXER_LOG, 
-                                                        SeverityPrefix::ERR, 0x01, 
-                                                        {"Cannot open file : \"", ppfPath, "\" as file does not exist at specified location\n", 
-                                                         "Note that the char buffer will stay empty and will not be suitable for processing"
-                                                        });
+                auto logFrame = pLogger::buildFrame
+                (
+                    IdPrefix::LEXER_LOG, 
+                    SeverityPrefix::ERR, 0x01, 
+                    {
+                        "Cannot open file : \"", ppfPath, "\" as file does not exist at specified location\n", 
+                        "Note that the char buffer will stay empty and will not be suitable for processing"
+                    }
+                );
                 pLogger::lprint(logFrame);
                 return;
             }
