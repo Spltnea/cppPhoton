@@ -78,7 +78,7 @@ I will add more entries here later
 
 ## Releases and Updates
 This section will be updated when the compiler will see its first iteration <br>
-Look for the `changelog/DEVELOPEMENT` directory to see bits of compiler actions (this is where i'll place some documentation about the core components) <br>
+Look for the `changelog/devlogs` directory to see what am i working on and how i tackle things <br>
 
 ## Documentation
 Pre-Release Documentation will be contained in the `documentation` folder <br>
