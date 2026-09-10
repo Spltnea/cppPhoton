@@ -7,6 +7,12 @@
 
 namespace photon {
 
+    /** The id prefix of the log code
+     *  0x1000 : PREPROCESSOR related logs
+     *  0x2000 : LEXER related logs
+     *  0x3000 : PARSER related logs
+     *  0x4000 : LLVM EMITTER related logs
+     */
     enum class IdPrefix : int {
         PREPROCESSOR_LOG = 0x1000,
         LEXER_LOG        = 0x2000,
@@ -14,12 +20,25 @@ namespace photon {
         LLVM_EMITTER_LOG = 0x4000
     };
 
+    /** The severity prefix of the log code
+     *  0x100 : INFO
+     *  0x200 : WARN
+     *  0x300 : ERR
+     * 
+     * Combined to the the ID prefix, this avoids verbose, for instance
+     * [PREPROCESSOR ERROR] -> 0x1300
+     * [LEXER WARN]         -> 0x2200
+     * [LLVM_EMITTER INFO]  -> 0x4100
+     * 
+     * The last two bytes are reserved to a custom error code associated to a message
+    */
     enum class SeverityPrefix : int {
         INFO = 0x100,
         WARN = 0x200,
         ERR  = 0x300,
     };
 
+    /** A frame containing a log entry, with the full id, the message and the timestamp */
     struct LogFrame {
         int id;
         std::string message;

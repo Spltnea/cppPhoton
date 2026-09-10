@@ -3,7 +3,12 @@
 
 #include "pToken.hpp"
 #include "pPreprocessor.hpp"
+
 #include "utils/types/iterableBuffer.hpp"
+#include "utils/vectorUtilities.hpp"
+#include "reservedEntries.hpp"
+
+#include <iostream>
 
 namespace photon {
 
@@ -23,14 +28,67 @@ namespace photon {
         
         // == Helpers ==
 
-        // Asserts that the given character is a new line
+        /**
+         * Asserts that the given character is a new line)
+         * @param c The given character
+        */
         bool isNewLine(char& c) {
             return (c == '\n');
         }
 
-        // Asserts that the given character is a valid whitespace character (' ', \n, \f, \r, \t and \v)
-        bool isWhitespace(char& c) {
+        /**
+         * Asserts that the given character is a valid whitespace character (' ', \\n, \f, \r, \t and \v)
+         * @param c The given character
+        */
+        bool isWhitespace(const char& c) {
             return std::isspace(static_cast<unsigned char>(c));
+        }
+
+        /**
+         * Asserts that the given character is the same as the expected character
+         * @param c The given character
+         * @param expectation The character to expect
+         */
+        bool compare(char& c, char expectation) {
+            return (c == expectation);
+        }
+
+        /**
+         * Asserts that the given character is a letter
+         * @param c The given character
+         */
+        bool isLetter(char& c) {
+            return std::isalpha(c);
+        }
+
+        bool isSymbol(char& c) {
+            return (isItemPresentIn(c, symbols));
+        }
+
+        // == Processing Helpers ==
+
+        /**
+         * Reads a word starting from the first character until the next whitespace or symbol and returns a token
+         * @param begin The first character to begin from
+         * @return A keyword token if the lexeme belongs to the keyword list, an identifier otherwise
+         */
+        Token readWord(char& begin) {
+            std::string lexeme;
+            char c = begin;
+            lexeme += c;
+            
+            while (!isWhitespace(charBuffer.currentElement()) && !isSymbol(c)) {
+                c = charBuffer.advance();
+                lexeme += c;
+                colNo++;
+            }
+
+            // Checks if the lexeme refers to a known keyword
+            if (isItemRefPresentIn(lexeme, reservedKeywords)) {
+                return {lineNo, colNo, TokenType::KEYWORD, lexeme};
+            }
+
+            return {lineNo, colNo, TokenType::IDENTIFIER, lexeme};
         }
 
     public :

@@ -6,10 +6,9 @@
 #include <string>
 
 namespace photon {
-    /**
-     * @brief A buffer which has an attached iterator
-     * Provides methods for iterating through the buffer and getting elements out of it
+    /** A buffer which has an attached iterator
      * 
+     *  Provides methods for iterating through the buffer and getting elements out of it
      * @tparam T The type of element stored in that buffer
      */
     template<typename T>
@@ -22,7 +21,7 @@ namespace photon {
         size_t _idx{0};
 
         /** 
-         * Asserts if the set offset is valid relative to the current index cursor position of the buffer
+         * Asserts that the set offset is valid relative to the current index cursor position of the buffer
          * @param offset The desired offset
         */
         [[nodiscard]] bool isValidOffset(int offset) const {
@@ -70,9 +69,9 @@ namespace photon {
         }
 
         /**
-         * Removes the latest element in the buffer
+         * Removes the last element in the buffer
          */
-        void removeLatestElement() {
+        void removeLastElement() {
             if (_data.empty()) return;
             
             _data.pop_back();
@@ -99,6 +98,9 @@ namespace photon {
          */
         [[nodiscard]] size_t position() const { return _idx; }
 
+        /**
+         * Asserts that the buffer is empty
+         */
         [[nodiscard]] bool isEmpty() const {
             return _data.empty();
         }
@@ -129,10 +131,10 @@ namespace photon {
             return _data[target];
         }
         
-        auto begin()       { return _data.begin(); }
-        auto end()         { return _data.end(); }
-        auto begin() const { return _data.begin(); }
-        auto end()   const { return _data.end(); }
+        auto begin()        { return _data.begin(); }
+        auto end()          { return _data.end(); }
+        auto begin()  const { return _data.begin(); }
+        auto end()    const { return _data.end(); }
         auto cbegin() const { return _data.cbegin(); }
         auto cend()   const { return _data.cend(); }
 

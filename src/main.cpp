@@ -37,7 +37,7 @@ int main(int argc, char** argv)
     photon::PreprocessResult preprocessingResult = preprocessor.applyPreprocessorPass();
 
     if (!preprocessingResult.success) {
-        std::cerr << "Compilation Errors Occured !";
+        std::cerr << "Compilation Errors Occured !\n";
         return 1;
     }
 
@@ -49,7 +49,7 @@ int main(int argc, char** argv)
     for (auto tok : tempArray) {
         std::cout   << "{TYPE : " << static_cast<int>(tok.type) 
                     << ", AT : {" << tok.lineNo << ", " << tok.colNo << "}"
-                    << ", LEXEME : " << tok.lexeme << "\n";
+                    << ", LEXEME : " << tok.lexeme << "} \n";
     }
 
     // Init llvm modules

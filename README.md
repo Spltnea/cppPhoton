@@ -90,7 +90,7 @@ It will be divided into multiple components : <br>
 ## AI Involvement
 I should mention that AI has been slightly used for the following things : <br>
 1. Compacting documentation to narrow down informations i need
-2. Small Code suggestions and optimizations (whether i refine and implement them or not)
+2. Small code suggestions and optimizations (whether i refine and implement them or not)
 3. Configuration quirks fixing when i cannot find those
 
 The AI is not aware of this project and is instead giving me abstract examples i rewrite, refactor, and use for this code, otherwise, about 95% of the code is human written, i always resort to trial and error, debugging, hand writting concepts, my personal knowledge (albeit limited to basic concepts), and online documentation from the following sites before resorting to AI (and you should do that too): <br>
@@ -99,6 +99,10 @@ The AI is not aware of this project and is instead giving me abstract examples i
 2. https://stackoverflow.com/questions
 3. https://www.w3schools.com/cpp/
 4. https://www.geeksforgeeks.org/cpp/c-plus-plus/
+
+I do not condone vibe coding (copy pasting code threw by an AI and calling it a day), use AI only to narrow down informations you really need instead of looking for hours on end to pages of documentation (even tho i still recommend doing this as you can learn a lot of stuff along the way) <br>
+
+Practicing, trial and error, looking at already made projects and having documentation aside is the best way (for me) to learn something specific about coding and really everything
 
 ## Endnote
 As much as i'm having fun doing this project as a begginer (or not), i hope it will illuminate some heads and inspire them to do the same thing, talking to a processor is really fun <br>
