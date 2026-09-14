@@ -46,10 +46,10 @@ int main(int argc, char** argv)
     lexer.applyLexerPass();
 
     photon::iterableBuffer tempArray = lexer.getTokens();
+    int i = 1;
     for (auto tok : tempArray) {
-        std::cout   << "{TYPE : " << static_cast<int>(tok.type) 
-                    << ", AT : {" << tok.lineNo << ", " << tok.colNo << "}"
-                    << ", LEXEME : " << tok.lexeme << "} \n";
+        std::cout   << "[" << i << "] TYPE : " << static_cast<int>(tok.type) << ", " << ", LEXEME : \"" << tok.lexeme << "\" \n";       
+        i++; 
     }
 
     // Init llvm modules

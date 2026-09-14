@@ -108,8 +108,11 @@ namespace photon {
         /**
          * Returns the current element without advancing the index cursor
          */
-        [[nodiscard]] T currentElement() const {
-            if (isAtEnd()) return T{};
+        [[nodiscard]] const T& currentElement() const {
+            if (isAtEnd()) {
+                static const T default_value{};
+                return default_value;
+            }
             return _data[_idx];
         }
 

@@ -69,8 +69,8 @@ The project will follow this roadmap, changes are subject to be made at any time
 | ------------------------    | ------------------------------------ |
 | Toolchain Configuration     | **DONE**                             |
 | Preprocessor Implementation | **DONE** - *Comments Stripping Only* |
-| Lexer Implementation        | **WORK IN PROGRESS**                 |
-| Parser Implementation       | **TODO**                             |
+| Lexer Implementation        | **DONE**                             |
+| Parser Implementation       | **WORK IN PROGRESS**                 |
 | Semantic Analysis           | **TODO**                             |
 | LLVM Generation             | **TODO**                             |
 

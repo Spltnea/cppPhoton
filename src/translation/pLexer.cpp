@@ -11,7 +11,7 @@ namespace photon {
             );
 
             pLogger::lprint(logFrame);
-            tokenBuffer.addElement({lineNo, colNo, TokenType::END_FILE, "EOF"}); 
+            tokenBuffer.addElement({TokenType::END_FILE, "EOF"}); 
 
             return;
         } 
@@ -20,14 +20,40 @@ namespace photon {
         while (!charBuffer.isAtEnd()) {
             char c = charBuffer.advance();
 
-            // Check for new lines and update the positions accordingly
-            if (isNewLine(c)) { lineNo++; colNo++; }
+            // Check for whitespaces to ignore
+            if (isWhitespace(c)) { continue; }
 
             // Check for identifiers and keywords
-            if (isLetter(c) || c == '_') { tokenBuffer.addElement(readWord(c)); } 
+            if (isLetter(c) || c == '_') { 
+                tokenBuffer.addElement(readWord(c)); 
+                continue;
+            }
+
+            // Check for numbers
+            if (std::isdigit(c) || (c == '.' && std::isdigit(charBuffer.currentElement()))) {
+                tokenBuffer.addElement(readNumber());
+                continue;
+            }
+
+            // Check for strings and chars
+            if (c == '\'' || c == '"') {
+                tokenBuffer.addElement(readStringOrChar(c));
+                continue;
+            }
+
+            // Check for symbols
+            if (isSymbol(c)) { 
+                tokenBuffer.addElement(readSymbol(c)); 
+                continue;
+            } 
+
+            // Fallback
+            else {
+                tokenBuffer.addElement({ TokenType::INVALID, "invalid" });
+            }
         }
 
-        tokenBuffer.addElement({lineNo, colNo, TokenType::END_FILE, "EOF"}); 
+        tokenBuffer.addElement({TokenType::END_FILE, "EOF"}); 
     }
 
 } // namespace photon
