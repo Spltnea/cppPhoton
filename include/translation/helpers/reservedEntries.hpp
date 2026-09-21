@@ -10,7 +10,7 @@ namespace photon {
     const std::vector<std::string> reservedKeywords = {
 
         // Variables
-        "var", "const",
+        "var", "const", "ptr"
 
         // Type declarations
         "i8", "i16", "i32", "i64", "i128",

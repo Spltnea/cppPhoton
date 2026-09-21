@@ -78,14 +78,12 @@ I will add more entries here later
 
 ## Releases and Updates
 This section will be updated when the compiler will see its first iteration <br>
-Look for the `changelog/devlogs` directory to see what am i working on and how i tackle things <br>
 
 ## Documentation
 Pre-Release Documentation will be contained in the `documentation` folder <br>
 It will be divided into multiple components : <br>
-1. `documentation/modules` This is where every module of the compiler will be explained in detail (code snippets, diagrams, and such)
-2. `documentation/concepts` Here i will share syntax concepts, mechanics, and so on, i might also place abstract algorithms on here, think of this as my ideas box i want to share
-3. `documentation/manual` I will write here the manual of this language
+1. `documentation/modules` This is where every module of the compiler will be documented
+2. `documentation/manual` I will write here the manual of this language
 
 ## AI Involvement
 I should mention that AI has been slightly used for the following things : <br>

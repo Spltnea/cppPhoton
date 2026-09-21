@@ -22,69 +22,11 @@ namespace photon {
         std::string sourceFileName;
 
         // Helper to build the output file name
-        std::string buildOutputFileName() const {
-            size_t lastDot = sourceFileName.find_last_of(".");
-            if (lastDot == std::string::npos) return sourceFileName + "." + processedFileExt;
-            return sourceFileName.substr(0, lastDot) + "." + processedFileExt;
-        }
+        std::string buildOutputFileName() const;
 
         // Helper to strip comments from the input file and send the processed file to the destination file reference
         // Note : Has a small algorithm to detect if those comments delimiters are present in strings to not strip them
-        void stripComments(std::ifstream& inputFile, std::ofstream& destinationFile) {
-            char c;
-            bool inLineComment = false;
-            bool inBlockComment = false;
-            bool inString = false;
-            bool isEscaped = false;
-
-            while (inputFile.get(c)) {
-                if (inString) {
-                    destinationFile.put(c);
-                    if (c == '\\' && !isEscaped) {
-                        isEscaped = true;
-                    } else {
-                        if (c == '"' && !isEscaped) {
-                            inString = false;
-                        }
-                        isEscaped = false;
-                    }
-                    continue;
-                }
-
-                if (inLineComment) {
-                    if (c == '\n') {
-                        inLineComment = false;
-                        destinationFile.put(c);
-                    }
-                    continue;
-                }
-
-                if (inBlockComment) {
-                    if (c == '*' && inputFile.peek() == '/') {
-                        inputFile.get(c); // Consomme le '/'
-                        inBlockComment = false;
-                    } else if (c == '\n') {
-                        destinationFile.put(c);
-                    }
-                    continue;
-                }
-
-                if (c == '"') {
-                    inString = true;
-                    isEscaped = false;
-                    destinationFile.put(c);
-                }
-                else if (c == '/' && inputFile.peek() == '/') {
-                    inLineComment = true;
-                }
-                else if (c == '/' && inputFile.peek() == '*') {
-                    inBlockComment = true;
-                }
-                else {
-                    destinationFile.put(c);
-                }
-            }
-        }
+        void stripComments(std::ifstream& inputFile, std::ofstream& destinationFile);
 
     public:
         explicit pPreprocessor(std::string fileName) : sourceFileName(std::move(fileName)) {}

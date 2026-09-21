@@ -119,7 +119,7 @@ namespace photon {
         /**
          * Returns the current element and advances the index cursor
          */
-        [[nodiscard]] T advance() {
+        T advance() {
             if (isAtEnd()) return T{};
             return _data[_idx++];
         }
