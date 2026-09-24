@@ -17,7 +17,7 @@ namespace photon {
         return (isItemPresentIn(c, symbols));
     }
 
-    Token pLexer::readWord(const char BEGIN) {
+    Token pLexer::readWord(iterableBuffer<char>& charBuffer, const char BEGIN) {
         std::string lexeme;
         char c = BEGIN;
         lexeme += c;
@@ -34,7 +34,7 @@ namespace photon {
         return {TokenType::IDENTIFIER, lexeme};
     }
 
-    Token pLexer::readSymbol(const char BEGIN) {
+    Token pLexer::readSymbol(iterableBuffer<char>& charBuffer, const char BEGIN) {
         std::string lexeme;
         char c = BEGIN;
         lexeme += c;
@@ -51,7 +51,7 @@ namespace photon {
         return {TokenType::SYMBOL, lexeme};
     }
 
-    Token pLexer::readNumber() {
+    Token pLexer::readNumber(iterableBuffer<char>& charBuffer) {
         size_t startPos = charBuffer.position() - 1;
 
         auto current_it = charBuffer.begin() + startPos;
@@ -75,7 +75,7 @@ namespace photon {
         return { TokenType::INVALID, "invalid" };
     }
 
-    Token pLexer::readStringOrChar(const char DELIMITER) {
+    Token pLexer::readStringOrChar(iterableBuffer<char>& charBuffer, const char DELIMITER) {
         std::string lexeme = "";
             
         while (charBuffer.currentElement() != DELIMITER) {
@@ -124,48 +124,8 @@ namespace photon {
 
 #pragma region Public Methods
 
-    explicit pLexer::pLexer(const PreprocessResult& PREP_RESULT) : ppfPath(PREP_RESULT.processedFilePath) {
-        charBuffer.resetBuffer();
-        tokenBuffer.resetBuffer();
-
-        std::ifstream fileToProcess(ppfPath, std::ios::binary | std::ios::ate);
-        if (!fileToProcess.is_open()) {
-            auto logFrame = pLogger::buildFrame
-            (
-                IdPrefix::LEXER_LOG, 
-                SeverityPrefix::ERR, 0x01, 
-                {
-                    "Cannot open file : \"", ppfPath, "\" as file does not exist at specified location\n", 
-                    "Note that the char buffer will stay empty and will not be suitable for processing"
-                }
-            );
-            pLogger::lprint(logFrame);
-            return;
-        }
-
-        std::streamsize stsize = fileToProcess.tellg();
-        fileToProcess.seekg(0, std::ios::beg);
-
-        if (stsize > 0) {
-            std::vector<char> buf(stsize);
-            fileToProcess.read(buf.data(), stsize);
-            charBuffer.setBuffer(std::move(buf));
-        }
-    }
-
-    void pLexer::applyLexerPass() {
-        if (charBuffer.isEmpty()) {
-            auto logFrame = pLogger::buildFrame
-            (
-                IdPrefix::LEXER_LOG, SeverityPrefix::ERR, 0x02, 
-                {"Empty char buffer, will not resume lexing process" }
-            );
-
-            pLogger::lprint(logFrame);
-            tokenBuffer.addElement({TokenType::END_FILE, "EOF"}); 
-
-            return;
-        } 
+    void pLexer::applyLexerPass(iterableBuffer<char>& charBuffer) {
+        if (charBuffer.isEmpty()) throw std::runtime_error("Empty character buffer, cannot go on with the lexing process, aborting");
             
         // Main lexing loop
         while (!charBuffer.isAtEnd()) {
@@ -176,25 +136,25 @@ namespace photon {
 
             // Check for identifiers and keywords
             if (isLetter(c) || c == '_') { 
-                tokenBuffer.addElement(readWord(c)); 
+                tokenBuffer.addElement(readWord(charBuffer, c)); 
                 continue;
             }
 
             // Check for numbers
             if (std::isdigit(c) || (c == '.' && std::isdigit(charBuffer.currentElement()))) {
-                tokenBuffer.addElement(readNumber());
+                tokenBuffer.addElement(readNumber(charBuffer));
                 continue;
             }
 
             // Check for strings and chars
             if (c == '\'' || c == '"') {
-                tokenBuffer.addElement(readStringOrChar(c));
+                tokenBuffer.addElement(readStringOrChar(charBuffer, c));
                 continue;
             }
 
             // Check for symbols
             if (isSymbol(c)) { 
-                tokenBuffer.addElement(readSymbol(c)); 
+                tokenBuffer.addElement(readSymbol(charBuffer, c)); 
                 continue;
             } 
 

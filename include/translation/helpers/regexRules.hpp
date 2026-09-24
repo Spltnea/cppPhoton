@@ -4,7 +4,7 @@
 #include <string>
 #include <regex>
 #include <vector>
-#include "pToken.hpp"
+#include "translation/intermediateObjects/pToken.hpp"
 
 namespace photon {
     const std::vector<std::pair<TokenType, std::regex>> NUMBER_RULES = {

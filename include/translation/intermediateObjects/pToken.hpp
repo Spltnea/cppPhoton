@@ -40,6 +40,19 @@ namespace photon {
         /// @brief The string value of the token
         std::string lexeme;
     };
+
+    /** Asserts that the token's type belongs to a numeric */
+    inline bool isNum(Token& tok) {
+        return (
+            tok.type == TokenType::INT            ||
+            tok.type == TokenType::INT_BIN_FORMAT ||
+            tok.type == TokenType::INT_OCT_FORMAT ||
+            tok.type == TokenType::INT_HEX_FORMAT ||
+            tok.type == TokenType::FLOAT          ||
+            tok.type == TokenType::FLOAT_HEX_FORMAT
+        );
+    }
+
 } // namespace photon
 
 

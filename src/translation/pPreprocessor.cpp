@@ -3,131 +3,105 @@
 namespace photon {
 #pragma region Private Methods
 
-    std::string pPreprocessor::buildOutputFileName() const {
-        size_t lastDot = sourceFileName.find_last_of(".");
-        if (lastDot == std::string::npos) return sourceFileName + "." + processedFileExt;
-        return sourceFileName.substr(0, lastDot) + "." + processedFileExt;
-    }
+    std::string pPreprocessor::stripComments(const std::string& src) {
+        std::string out;
+        out.reserve(src.size());
 
-    void pPreprocessor::stripComments(std::ifstream& inputFile, std::ofstream& destinationFile) {
-        enum class State {
-            Normal,
-            InLineComment,
-            InBlockComment,
-            InString,
-            InChar,
-        };
-
-        State state = State::Normal;
+        enum class State { NORMAL, INLINE_COMMENT, BLOCK_COMMENT, STRING, CHAR };
+        State state = State::NORMAL;
         bool isEscaped = false;
-        std::string rawDelimiter;
-        char c;
 
-        while (inputFile.get(c)) {
+        for (size_t i = 0; i < src.size(); ++i) {
+            char c = src[i];
+            char next = (i + 1 < src.size()) ? src[i + 1] : '\0';
+
             switch (state) {
-
-                case State::Normal: {
-                    if (c == '\'') {
-                        state = State::InChar;
+                case State::NORMAL:
+                    if (c == '"') {
+                        state = State::STRING;
                         isEscaped = false;
-                        destinationFile.put(c);
-                    }
-                    else if (c == '"') {
-                        state = State::InString;
+                        out.push_back(c);
+                    } else if (c == '\'') {
+                        state = State::CHAR;
                         isEscaped = false;
-                        destinationFile.put(c);
+                        out.push_back(c);
+                    } else if (c == '/' && next == '/') {
+                        state = State::INLINE_COMMENT;
+                        ++i; // skip '/'
+                    } else if (c == '/' && next == '*') {
+                        state = State::BLOCK_COMMENT;
+                        ++i; // skip '*'
+                    } else {
+                        out.push_back(c);
                     }
-                    else if (c == '/' && inputFile.peek() == '/') {
-                        inputFile.get(c);
-                        state = State::InLineComment;
+                    break;
+
+                case State::STRING:
+                case State::CHAR: {
+                    out.push_back(c);
+                    char quote = (state == State::STRING) ? '"' : '\'';
+                    if (isEscaped) {
+                        isEscaped = false;
+                    } else if (c == '\\') {
+                        isEscaped = true;
+                    } else if (c == quote) {
+                        state = State::NORMAL;
                     }
-                    else if (c == '/' && inputFile.peek() == '*') {
-                        inputFile.get(c);
-                        state = State::InBlockComment;
-                    }
-                    else { destinationFile.put(c); }
                     break;
                 }
 
-                case State::InChar: {
-                    destinationFile.put(c);
-                    if (isEscaped) { isEscaped = false; }
-                    else if (c == '\\') { isEscaped = true; }
-                    else if (c == '\'') { state = State::Normal; }
-                    break;
-                }
-
-                case State::InString: {
-                    destinationFile.put(c);
-                    if (isEscaped) { isEscaped = false; }
-                    else if (c == '\\') { isEscaped = true; }
-                    else if (c == '"') { state = State::Normal; }
-                    break;
-                }
-
-                case State::InLineComment: {
+                case State::INLINE_COMMENT:
                     if (c == '\n') {
-                        state = State::Normal;
-                        destinationFile.put(c);
+                        state = State::NORMAL;
+                        out.push_back(c);
                     }
                     break;
-                }
 
-                case State::InBlockComment: {
-                    if (c == '*' && inputFile.peek() == '/') {
-                        inputFile.get(c);
-                        state = State::Normal;
-                    } else if (c == '\n') { destinationFile.put(c); }
+                case State::BLOCK_COMMENT:
+                    if (c == '*' && next == '/') {
+                        state = State::NORMAL;
+                        ++i; // skip '/'
+                    } else if (c == '\n') {
+                        out.push_back(c); // Preserve newlines for compiler error line numbers
+                    }
                     break;
-                }
             }
         }
+
+        return out;
     }
 
 #pragma endregion Private Methods
 
 #pragma region Public Methods
 
-    PreprocessResult pPreprocessor::applyPreprocessorPass() {
-        PreprocessResult result;
-        result.sourcePath = sourceFileName;
-        result.processedFilePath = buildOutputFileName();
+    void pPreprocessor::applyPreprocessorPass(std::string sourceFileName) {
+        fs::path filePath(sourceFileName);
 
-        std::ifstream inputFile(sourceFileName);
-        if (!inputFile.is_open()) {
-            auto logFrame = pLogger::buildFrame(
-                IdPrefix::PREPROCESSOR_LOG, 
-                SeverityPrefix::ERR, 0x01, 
-                {"Cannot open file : \"", sourceFileName, "\" as file does not exist at specified location"}
-            );
-            pLogger::lprint(logFrame);
-            return result;
+        // checks if the file exists and is regular file
+        if (!fs::exists(filePath)) {
+            throw std::runtime_error("[PREPROCESSOR] - File does not exist: " + sourceFileName);
         }
 
-        std::ofstream outputFile(result.processedFilePath);
-        if (!outputFile.is_open()) {
-            auto logFrame = pLogger::buildFrame(
-                IdPrefix::PREPROCESSOR_LOG, 
-                SeverityPrefix::ERR, 0x02, 
-                {"Cannot create file : \"", result.processedFilePath, "\""}
-            );
-            pLogger::lprint(logFrame);
-            return result;
+        if (!fs::is_regular_file(filePath)) {
+            throw std::runtime_error("[PREPROCESSOR] - Path is not a regular file: " + sourceFileName);
         }
 
-        stripComments(inputFile, outputFile);
+        // Fetch file size and handle empty files
+        auto fileSize = fs::file_size(filePath);
+        if (fileSize == 0) { processedFileBuffer = std::make_unique<iterableBuffer<char>>(); return; }
+        
+        std::ifstream file(filePath, std::ios::in | std::ios::binary);
+        if (!file.is_open()) { throw std::runtime_error("[PREPROCESSOR] - Failed to open file: " + sourceFileName); }
 
-        result.success = true;
+        std::string rawCnt;
+        rawCnt.resize(fileSize);
 
-        auto logFrame = pLogger::buildFrame(
-            IdPrefix::PREPROCESSOR_LOG, 
-            SeverityPrefix::INFO, 0x01,                   
-            {"Preprocessor pass done on file \"", sourceFileName, "\" and sent it to \"", result.processedFilePath, "\""}
-        );
+        file.read(&rawCnt[0], fileSize);
+        file.close();
 
-        pLogger::lprint(logFrame);
-
-        return result;
+        std::string cleanedCnt = stripComments(rawCnt);
+        processedFileBuffer = std::make_unique<iterableBuffer<char>>(std::move(cleanedCnt));
     }
 
 #pragma enderegion Public Methods

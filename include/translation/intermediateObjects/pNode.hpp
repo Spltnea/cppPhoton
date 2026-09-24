@@ -36,6 +36,17 @@ namespace photon {
         ~EntrySetNode() override = default;
     };
 
+    // Base class for attributes
+    class AttributeNode : public Node {
+    private:
+        std::string attributeName;
+        iterableBuffer<std::unique_ptr<ExpressionNode>> args;
+    public:
+        ~AttributeNode() override = default;
+        explicit AttributeNode(std::string atrName, iterableBuffer<std::unique_ptr<ExpressionNode>> atrArgs) 
+            : attributeName(std::move(atrName)), args(std::move(atrArgs)) {}
+    };
+
 #pragma endregion Base Classes
 
 #pragma region Expression Nodes
@@ -84,9 +95,9 @@ namespace photon {
     class FunctionCallExpressionNode : public ExpressionNode {
     private:
         std::string functionName;
-        std::unique_ptr<iterableBuffer<ExpressionNode>> passedArguments;
+        std::unique_ptr<iterableBuffer<std::unique_ptr<ExpressionNode>>> passedArguments;
     public:
-        explicit FunctionCallExpressionNode(std::string name, std::unique_ptr<iterableBuffer<ExpressionNode>> args) : functionName(std::move(name)), passedArguments(std::move(args)) {}
+        explicit FunctionCallExpressionNode(std::string name, std::unique_ptr<iterableBuffer<std::unique_ptr<ExpressionNode>>> args) : functionName(std::move(name)), passedArguments(std::move(args)) {}
     };
 
     /** A node wrapped in parenthesis */
@@ -120,7 +131,7 @@ public:
     explicit ParameterDeclarationNode(std::string name, std::string type, std::unique_ptr<ExpressionNode> value) : paramName(std::move(name)), paramType(std::move(type)), defaultValue(std::move(value)) {}
 };
 
-#pragma enderegion Structural Nodes
+#pragma endregion Structural Nodes
 
 #pragma region Statement Nodes
 
@@ -189,7 +200,6 @@ public:
 
     // == Definitions ==
 
-    /** A node managing function definitions */
     class FunctionDefinitionNode : public StatementNode {
     private:
         std::string functionName;

@@ -18,12 +18,6 @@ namespace photon {
     private :
         // The array of processed tokens
         iterableBuffer<Token> tokenBuffer;
-
-        // The char array containing the processed text file
-        iterableBuffer<char> charBuffer;
-
-        // The path to the processed photon script file
-        std::string ppfPath;
         
         /**
          * Asserts that the given character is a valid whitespace character (' ', \\n, \f, \r, \t and \v)
@@ -47,41 +41,39 @@ namespace photon {
          * @param BEGIN The first character to begin from
          * @return A keyword token if the lexeme belongs to the keyword list, an identifier otherwise
          */
-        Token readWord(const char BEGIN);
+        Token readWord(iterableBuffer<char>& charBuffer, const char BEGIN);
 
         /**
          * Reads a symbol from the first character until the next non symbol character and returns a token
          * @param BEGIN The first character to begin from
          */
-        Token readSymbol(const char BEGIN);
+        Token readSymbol(iterableBuffer<char>& charBuffer, const char BEGIN);
 
         /**
          * Reads a number from the first character until the next non number character and returns a token
          */
-        Token readNumber();
+        Token readNumber(iterableBuffer<char>& charBuffer);
 
          /**
          * Reads a string value or char value between two matching delimiters
          * @param DELIMITER The symbol that delimits the value
          */
-        Token readStringOrChar(const char DELIMITER);
+        Token readStringOrChar(iterableBuffer<char>& charBuffer, const char DELIMITER);
 
     public :
-        explicit pLexer(const PreprocessResult& PREP_RESULT);
-
-        /** Returns the token list as an immutable reference */
-        const iterableBuffer<Token>& getTokens() const {
+        /** Gets the lexer's token list */
+        iterableBuffer<Token>& getTokens() {
             return tokenBuffer;
         }
 
-        /** Transforms the cleaned source file into a stream of tokens 
+        /** Processes a char buffer into a stream of tokens
          * Note : The token stream will ALWAYS contain the following token :
          * - END_OF_FILE token
          * 
-         * If anything goes wrong during the lexing pass, this token only will remain at coords {1; 1} inside the token stream
+         * If anything goes wrong during the lexing pass, this token only will remain inside the token stream
          * To get the processed stream, use the provided getTokens() function
         */
-        void applyLexerPass();
+        void applyLexerPass(iterableBuffer<char>& charBuffer);
 
     }; // class pLexer
 } // namespace photon

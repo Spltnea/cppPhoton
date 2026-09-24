@@ -50,7 +50,10 @@ Building the project involves a two step process i will later automate using scr
 
 ```bash
 # At the parent directory (cppPhoton/), execute
-cmake -B build
+cmake -B build                          # Release Version
+cmake -B build -DCMAKE_BUILD_TYPE=Debug # Debug Version
+
+# Note : If you want to add debuging to the code, enable those using #ifdef DEBUG #endif macros to not polute the final executable
 
 # Build the compiler
 cmake --build build

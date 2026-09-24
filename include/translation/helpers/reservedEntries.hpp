@@ -22,7 +22,7 @@ namespace photon {
 
         // Builtin Literals
         "true", "false",
-        "nullref", "nullptr",
+        "nullval", "nullptr",
 
         // Conditional
         "if", "else",

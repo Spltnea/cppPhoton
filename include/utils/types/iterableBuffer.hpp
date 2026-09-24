@@ -56,7 +56,7 @@ namespace photon {
          * Add an element to the buffer
          * @param element The element to add
          */
-        void addElement(T& element) {
+        void addElement(const T& element) {
             _data.push_back(element);
         }
 
@@ -65,7 +65,7 @@ namespace photon {
          * @param element The element to add
          */
         void addElement(T&& element) {
-            _data.push_back(element);
+            _data.push_back(std::move(element));
         }
 
         /**
@@ -128,10 +128,13 @@ namespace photon {
          * Fetches the element at an offset relative to the current index cursor
          * @param offset The offset to look at
          */
-        [[nodiscard]] T elementAt(int offset) const {
-            std::ptrdiff_t target = static_cast<std::ptrdiff_t>(_idx) + offset;
-            if (!isValidOffset(offset)) return T{};
-            return _data[target];
+        [[nodiscard]] bool isValidOffset(int offset) const {
+            if (offset < 0) {
+                auto abs_offset = static_cast<size_t>(-static_cast<long long>(offset));
+                return _idx >= abs_offset;
+            }
+            auto pos_offset = static_cast<size_t>(offset);
+            return (_data.size() - _idx) > pos_offset;
         }
         
         auto begin()        { return _data.begin(); }
