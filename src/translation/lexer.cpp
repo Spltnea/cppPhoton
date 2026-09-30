@@ -173,6 +173,7 @@ namespace photon {
                 continue; 
             }
 
+            // Textual constants reading
             if (c == '\'' || c == '"') { internalBuffer.addElement(createTextualConstantToken()); continue; }
 
             // Numbers reading
@@ -181,9 +182,11 @@ namespace photon {
             // Identifiers and Keywords reading
             if (isLetter(c) || c == '_') { internalBuffer.addElement(createWordToken()); continue; }
 
+            // Symbols reading
             if (isGenericSymbol(c)) { internalBuffer.addElement(createSymbolToken()); continue; }
 
             sourceBuffer.advance();
+            internalBuffer.addElement({ Token::TokenType::_INVALID, "INVALID", sourceBuffer.cursorPosition()});
         }
 
         internalBuffer.addElement({Token::TokenType::_EOF, "EOF", sourceBuffer.cursorPosition()});
