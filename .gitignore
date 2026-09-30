@@ -24,3 +24,6 @@ _deps/
 # OS generated files
 .DS_Store
 Thumbs.db
+
+# Dev defined files
+sandbox/
