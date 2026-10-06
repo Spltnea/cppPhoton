@@ -13,6 +13,8 @@ fn _start() {
 ## Project Presentation
 The Photon Programming Language is a bare-metal targeted language designed to eliminate the common pitfalls and quirks of bare-metal development in C and C++.
 
+The reference compiler is implemented in **modern C++23**, completely utilizing **C++20/C++23 Modules (`.cppm`)** and standard library module imports (`import std;`).
+
 ---
 
 ## Features
@@ -49,7 +51,7 @@ Help :
 ```
 
 - **Compile-time safety checks** for critical code paths.
-- **Portable, multi-architecture compiler** powered by LLVM.
+- **Fast, modern compiler architecture** built without legacy textual header overhead.
 
 ---
 
@@ -62,27 +64,14 @@ The compiler implements built-in compile-time verification to detect and prevent
 
 ---
 
-## Resources, Documentation & AI Involvement
+## Requirements
 
-### References
-- [cppreference.com](https://cppreference.com/)
-- [cplusplus.com](https://cplusplus.com/)
-- [LLVM Documentation](https://llvm.org/docs/)
-- [Stack Overflow](https://stackoverflow.com/)
-- [r/cpp](https://www.reddit.com/r/cpp/)
-- [GeeksforGeeks C++](https://www.geeksforgeeks.org/cpp/c-plus-plus/)
+Building `cppPhoton` requires bleeding-edge C++23 standard module support:
 
-### Note on AI
-AI was utilized strictly as an auxiliary tool for:
-- Writing and structuring build configuration files (`CMakeLists.txt` and presets).
-- Parsing and navigating dense LLVM APIs and documentation.
-- Providing isolated, synthetic code snippets for study.
-- Cross-referencing language design patterns across existing compilers.
-- Serving as a technical critique partner.
-
-95% of the codebase and documentation is written by hand or adapted from public open-source implementations. Coding is an art form—it is not merely about generating working syntax, but expressing design intent clearly.
-
-*Any file, function, or snippet directly generated or modified by AI will be explicitly marked with an `// AI Generated | Modified` header comment.*
+* **Compiler:** **Clang 19+** with **`libc++`** (Clang's `libc++` is mandatory for `import std;`)
+* **Build System:** **CMake 3.30+** (Required for experimental `import std;` support)
+* **Generator:** **Ninja 1.11+** (Traditional Makefiles do not support module scanning)
+* **Language Server (Optional):** **`clangd-19`**
 
 ---
 
@@ -90,50 +79,35 @@ AI was utilized strictly as an auxiliary tool for:
 
 ### 1 : Install the Toolchain
 
-#### Ubuntu, Debian, Linux Mint
+#### Ubuntu / Debian / Linux Mint
 ```bash
+# 1. Install Clang 19, libc++, Ninja, and Git
 sudo apt update
-sudo apt install -y build-essential clang llvm-dev libclang-dev libzstd-dev libffi-dev cmake ninja-build git
+sudo apt install -y clang-19 clangd-19 libc++-19-dev libc++abi-19-dev ninja-build git
+
+# 2. Ensure CMake >= 3.30 is installed
+# (If your system apt has an older version, install via pip or the official Kitware repo):
+cmake --version
+# pip install --upgrade cmake
 ```
 
-#### Fedora, RHEL, CentOS Stream, Rocky Linux
+#### Arch Linux / Manjaro
 ```bash
-sudo dnf install -y gcc-c++ clang llvm-devel libzstd-devel libffi-devel cmake ninja-build make git
+sudo pacman -Syu --needed clang libc++ libc++abi cmake ninja git
 ```
 
-#### Arch Linux, Manjaro
+#### Fedora / RHEL
 ```bash
-sudo pacman -Syu --needed base-devel clang llvm llvm-libs zstd libffi cmake ninja git
+sudo dnf install -y clang libcxx-devel libcxxabi-devel cmake ninja-build git
 ```
 
-#### macOS
+#### macOS (Homebrew)
 ```bash
-# 1. Install Apple Command Line Tools
-xcode-select --install
+brew install llvm cmake ninja git
 
-# 2. Install Homebrew (if not already installed)
-/bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
-
-# 3. Install dependencies
-brew install llvm cmake ninja git zstd libffi
-
-# 4. Expose Homebrew LLVM to your environment
+# Expose LLVM Clang to your PATH
 export PATH="$(brew --prefix llvm)/bin:$PATH"
-export LLVM_DIR="$(brew --prefix llvm)/lib/cmake/llvm"
 ```
-
-#### Windows (Run PowerShell as Administrator)
-```powershell
-# 1. Install Visual Studio Build Tools (MSVC compiler & Windows SDK)
-winget install --id Microsoft.VisualStudio.2022.BuildTools --override "--passive --config --add Microsoft.VisualStudio.Workload.VCTools --includeRecommended"
-
-# 2. Install LLVM, CMake, Ninja, and Git
-winget install --id LLVM.LLVM -e
-winget install --id Kitware.CMake -e
-winget install --id Ninja-build.ninja -e
-winget install --id Git.Git -e
-```
-*Restart PowerShell after installation.*
 
 ---
 
@@ -146,97 +120,97 @@ cd cppPhoton
 
 ---
 
-### 3 : Configure the Project
+### 3 : Configure & Build (Using Presets)
 
-> **macOS Reminder:** If using Homebrew LLVM, ensure `export LLVM_DIR="$(brew --prefix llvm)/lib/cmake/llvm"` is set before configuring.
+The repository uses **CMake Presets (v6)** to automatically wire up `clang++-19`, `Ninja`, and `-stdlib=libc++`.
 
-#### Option A: Using CMake Presets (Recommended)
+#### Release Mode:
+```bash
+# Configure
+cmake --preset release
 
-* **Release Mode:**
-  ```bash
-  cmake --preset release
-  ```
+# Build
+cmake --build --preset release
+```
 
-* **Debug Mode** *(enables `#if DEBUG` and `#ifdef DEBUG` macros)*:
-  ```bash
-  cmake --preset debug
-  ```
+#### Debug Mode *(Enables debug definitions)*:
+```bash
+# Configure
+cmake --preset debug
 
-#### Option B: Manual Configuration
+# Build
+cmake --build --preset debug
+```
 
 <details>
-<summary>Click to view manual commands</summary>
+<summary>Click to view manual configuration without presets</summary>
 
-* **Linux / macOS (Clang & Ninja):**
-  ```bash
-  cmake -B build/release -G Ninja -DCMAKE_BUILD_TYPE=Release -DCMAKE_CXX_COMPILER=clang++ -DCMAKE_C_COMPILER=clang
-  ```
+```bash
+cmake -B build/release -G Ninja \
+  -DCMAKE_BUILD_TYPE=Release \
+  -DCMAKE_CXX_COMPILER=clang++-19 \
+  -DCMAKE_C_COMPILER=clang-19 \
+  -DCMAKE_CXX_FLAGS="-stdlib=libc++" \
+  -DCMAKE_EXE_LINKER_FLAGS="-stdlib=libc++" \
+  -DCMAKE_EXPORT_COMPILE_COMMANDS=ON
 
-* **Linux (GCC & Ninja):**
-  ```bash
-  cmake -B build/release -G Ninja -DCMAKE_BUILD_TYPE=Release -DCMAKE_CXX_COMPILER=g++ -DCMAKE_C_COMPILER=gcc
-  ```
-
-* **Windows (PowerShell / Developer Command Prompt):**
-  ```powershell
-  # Using MSVC + Ninja
-  cmake -B build/release -G Ninja -DCMAKE_BUILD_TYPE=Release
-
-  # Using Clang + Ninja
-  cmake -B build/release -G Ninja -DCMAKE_BUILD_TYPE=Release -DCMAKE_CXX_COMPILER=clang++
-  ```
-
-*(To configure for Debug, replace `Release` and `build/release` with `Debug` and `build/debug`)*
+cmake --build build/release
+```
 </details>
 
 ---
 
-### 4 : Compile and Link
+### 4 : Running
 
-#### If using Presets:
-```bash
-# Build Release
-cmake --build --preset release
+Execute the compiler binary directly:
 
-# Build Debug
-cmake --build --preset debug
-```
-
-#### If configured manually:
-```bash
-# Release
-cmake --build build/release -j
-
-# Debug
-cmake --build build/debug -j
-```
-
----
-
-### 5 : Running
-
-Execute the binary from the project root:
-
-#### Linux / macOS
 ```bash
 # Run Release build
 ./build/release/cppPhoton
 
 # Run Debug build
 ./build/debug/cppPhoton
-
-# In case of permission issues:
-chmod +x ./build/release/cppPhoton
 ```
 
-#### Windows (PowerShell)
-```powershell
-# Run Release build
-.\build\release\cppPhoton.exe
+---
 
-# Run Debug build
-.\build\debug\cppPhoton.exe
+## IDE & Editor Setup (VS Code)
 
-# In case of permission issues:
-icacls ".\build\release\cppPhoton.exe" /grant:r "${env:USERNAME}:RX"
-``` 
+For the best developer experience with C++23 modules:
+
+1. Install the official **clangd** extension (`llvm-vs-code-extensions.vscode-clangd`).
+2. Disable the default Microsoft C/C++ IntelliSense engine.
+3. Ensure `.vscode/settings.json` points to `clangd-19` with module support enabled:
+
+```json
+{
+  "clangd.path": "/usr/bin/clangd-19",
+  "clangd.arguments": [
+    "--compile-commands-dir=build/release",
+    "--experimental-modules-support",
+    "--background-index"
+  ]
+}
+```
+
+---
+
+## Resources, Documentation & AI Involvement
+
+### References
+- [cppreference.com](https://cppreference.com/)
+- [LLVM / Clang Modules Documentation](https://clang.llvm.org/docs/StandardCPlusPlusModules.html)
+- [CMake C++ Modules Guide](https://cmake.org/cmake/help/latest/manual/cmake-cxxmodules.7.html)
+- [Stack Overflow](https://stackoverflow.com/)
+- [r/cpp](https://www.reddit.com/r/cpp/)
+
+### Note on AI
+AI was utilized strictly as an auxiliary tool for:
+- Writing and structuring modern C++ module build configuration files (`CMakeLists.txt` and presets).
+- Providing isolated, synthetic code snippets for study.
+- Cross-referencing language design patterns across existing compilers.
+- Serving as a technical critique partner.
+
+95% of the codebase and documentation is written by hand. Coding is an art form—it is not merely about generating working syntax, but expressing design intent clearly.
+
+*Any file, function, or snippet directly generated or modified by AI will be explicitly marked with an `// AI Generated | Modified` header comment.*

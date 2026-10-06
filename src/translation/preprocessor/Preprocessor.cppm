@@ -1,22 +1,13 @@
-#ifndef PREPROCESSOR_UNIT_HPP
-#define PREPROCESSOR_UNIT_HPP
+export module Preprocessor;
 
-#include <regex>
-#include <string>
-
-#include <iostream>
-#include <print>
-
-#include <filesystem>
-#include <fstream>
-
-#include "utilities/types/iterableBuffer.hpp"
+import std;
+import IterableBuffer;
 
 namespace fs = std::filesystem;
 
 namespace photon {
     /// @brief Handles copy pasting functions, clears comments and yields a cleaned source code
-    class Preprocessor {
+    export class Preprocessor {
     private:
         std::string rawSource;                 // The source code contained in the file as a contiguous array of memory
         iterableBuffer<char> internalBuffer;   // The internal char buffer to be transfered over
@@ -39,9 +30,6 @@ namespace photon {
         void process(const fs::path& filePath);
 
         /// @brief Transfers the internal buffer over to a payload and flushes the internal buffers making the unit ready for a new file
-        /// @return 
         PreprocessorOutput buildOutput();  
     };
 }
-
-#endif // PREPROCESSOR_UNIT_HPP

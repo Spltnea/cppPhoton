@@ -1,43 +1,44 @@
 // AI Helps for REGEX related methods
 
-#include "lexer.hpp"
+module Lexer;
+
+import Preprocessor;
+import std;
 
 namespace photon {
 #pragma region Private Methods
 
-    void Lexer::flushBuffers() {
+    void Lexer::flushBuffers() noexcept {
         sourceBuffer.clear();
         internalBuffer.clear();
     }
 
     // == Processing Utilities ==
 
-    [[nodiscard]] bool Lexer::isLetter(const char c) {
-        static const std::regex matchingRule(R"([a-zA-Z])");
-        return std::regex_match(&c, &c + 1, matchingRule);
+    [[nodiscard]] constexpr bool Lexer::isLetter(const char c) noexcept {
+        return (c >= 'a' && c <= 'z') || (c >= 'A' && c <= 'Z') || (c == '_');
     }
 
-    [[nodiscard]] bool Lexer::isDigit(const char c) {
-        static const std::regex matchingRule(R"([0-9])");
-        return std::regex_match(&c, &c + 1, matchingRule);
+    [[nodiscard]] constexpr bool Lexer::isDigit(const char c) noexcept {
+        return c >= '0' && c <= '9';
     }
 
-    [[nodiscard]] bool Lexer::isSimpleSymbol(const char c) {
+    [[nodiscard]] constexpr bool Lexer::isSimpleSymbol(const char c) noexcept {
         return ReservedEntries::isEntryIn(c, ReservedEntries::soloSymbols);
     }
 
-    [[nodiscard]] bool Lexer::isCombinableSymbol(const char c) {
+    [[nodiscard]] constexpr bool Lexer::isCombinableSymbol(const char c) noexcept {
         return ReservedEntries::isEntryIn(c, ReservedEntries::combinableSymbols);
     }
 
-    [[nodiscard]] bool Lexer::isGenericSymbol(const char c) {
+    [[nodiscard]] constexpr bool Lexer::isGenericSymbol(const char c) noexcept {
         return (
             ReservedEntries::isEntryIn(c, ReservedEntries::combinableSymbols) ||
             ReservedEntries::isEntryIn(c, ReservedEntries::soloSymbols)
         );
     }
 
-    [[nodiscard]] Lexer::Token Lexer::createWordToken() {
+    [[nodiscard]] Lexer::Token Lexer::createWordToken() noexcept {
         static const std::regex matchingRule(R"([a-zA-Z0-9_]+)");
         
         const char* current = sourceBuffer.currentElementPointer();
@@ -45,19 +46,19 @@ namespace photon {
         std::cmatch match;
 
         if (std::regex_search(current, end, match, matchingRule, std::regex_constants::match_continuous)) {
-            std::string lexeme = match[0].str();
+            std::string_view lexeme(&*match[0].first, match.length(0));
             sourceBuffer.advance(match.length(0));
 
             return (ReservedEntries::isEntryRefIn(lexeme, ReservedEntries::keywordTable) 
-                    ? Token{Token::TokenType::_KEYWORD, std::move(lexeme), sourceBuffer.cursorPosition()}
-                    : Token{Token::TokenType::_IDENTIFIER, std::move(lexeme), sourceBuffer.cursorPosition()});
+                    ? Token{Token::TokenType::_KEYWORD, lexeme, sourceBuffer.cursorPosition()}
+                    : Token{Token::TokenType::_IDENTIFIER, lexeme, sourceBuffer.cursorPosition()});
         }
 
         sourceBuffer.advance();
         return {Token::TokenType::_INVALID, "INVALID", sourceBuffer.cursorPosition()};
     }
 
-    [[nodiscard]] Lexer::Token Lexer::createNumberToken() {
+    [[nodiscard]] Lexer::Token Lexer::createNumberToken() noexcept {
         static const std::regex matchingRule(
             R"(0[xX][0-9a-fA-F](_?[0-9a-fA-F])*|)"
             R"(0[bB][01](_?[01])*|)"
@@ -72,7 +73,7 @@ namespace photon {
         std::cmatch match;
 
         if (std::regex_search(current, end, match, matchingRule, std::regex_constants::match_continuous)) {
-            std::string lexeme = match[0].str();
+            std::string_view lexeme(&*match[0].first, match.length(0));
             sourceBuffer.advance(match.length(0));
 
             return {Token::TokenType::_NUMBER, std::move(lexeme), sourceBuffer.cursorPosition()};
@@ -82,12 +83,12 @@ namespace photon {
         return {Token::TokenType::_INVALID, "INVALID", sourceBuffer.cursorPosition()};
     }
 
-    [[nodiscard]] Lexer::Token Lexer::createSymbolToken() {
+    [[nodiscard]] Lexer::Token Lexer::createSymbolToken() noexcept {
         char c = sourceBuffer.currentElement();
 
         if (isSimpleSymbol(c)) { 
             sourceBuffer.advance();
-            return { Token::TokenType::_SYMBOL, std::string(1, c), sourceBuffer.cursorPosition() };
+            return { Token::TokenType::_SYMBOL, std::string_view(sourceBuffer.currentElementPointer(), 1), sourceBuffer.cursorPosition() };
         }
         
         static const std::regex matchingRule(R"([+\-*/%=<>&|~!\^?.:]+)");
@@ -97,7 +98,7 @@ namespace photon {
         std::cmatch match;
 
         if (std::regex_search(current, end, match, matchingRule, std::regex_constants::match_continuous)) {
-            std::string lexeme = match[0].str();
+            std::string_view lexeme(&*match[0].first, match.length(0));
 
             sourceBuffer.advance(match.length(0));
 
@@ -108,7 +109,7 @@ namespace photon {
         return {Token::TokenType::_INVALID, "INVALID", sourceBuffer.cursorPosition()};
     }
 
-    [[nodiscard]] Lexer::Token Lexer::createTextualConstantToken() {
+    [[nodiscard]] Lexer::Token Lexer::createTextualConstantToken() noexcept {
 
         char c = sourceBuffer.currentElement();
 
@@ -120,7 +121,7 @@ namespace photon {
             std::cmatch match;
 
             if (std::regex_search(current, end, match, matchingRule, std::regex_constants::match_continuous)) {
-                std::string lexeme = match[0].str();
+                std::string_view lexeme(&*match[0].first, match.length(0));
 
                 sourceBuffer.advance(match.length(0));
 
@@ -138,11 +139,11 @@ namespace photon {
         std::cmatch match;
 
         if (std::regex_search(current, end, match, matchingRule, std::regex_constants::match_continuous)) {
-            std::string symbol = match[0].str();
+            std::string_view lexeme(&*match[0].first, match.length(0));
 
             sourceBuffer.advance(match.length(0));
 
-            return {Token::TokenType::_STRING, std::move(symbol), sourceBuffer.cursorPosition()};
+            return {Token::TokenType::_STRING, std::move(lexeme), sourceBuffer.cursorPosition()};
         }
 
         sourceBuffer.advance();

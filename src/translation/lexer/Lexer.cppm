@@ -1,14 +1,8 @@
-#ifndef LEXER_UNIT_HPP
-#define LEXER_UNIT_HPP
+export module Lexer;
 
-#include <cstdint>
-#include <ostream>
-#include <iostream>
-#include <array>
-#include <span>
-#include <algorithm>
-
-#include "preprocessor.hpp" // iterableBuffer, regex, PreprocessorOutput
+import std;
+import Preprocessor;
+import IterableBuffer;
 
 namespace photon {
 
@@ -24,10 +18,10 @@ namespace photon {
             "fn", "struct", "record", "fnset", "interface", "enum", "union", "typedef",
 
             // Visibility Modifiers
-            "public", "protected", "package_private", "file_private", "private"
+            "public", "protected", "package_private", "file_private", "private",
 
             // FFI Modifiers
-            "extern", "export"
+            "extern", "export",
 
             // Attibutes Modifiers
             "packed", "partial", "abstract",
@@ -37,7 +31,7 @@ namespace photon {
 
             // Flow Control
             "if", "else", "while", "switch",
-            "return", "break", "continue", "skip"
+            "return", "break", "continue",
 
             // Builtin Constants
             "nullval", "nullptr",
@@ -78,7 +72,7 @@ namespace photon {
     };
 
     /// @brief Tokenizes a source code in order for it to be processed furthermore
-    class Lexer {
+    export class Lexer {
     private:
         /// @brief A token represents a value in the source code, with more informations such as the token type (number, string, etc) and its offset in the text
         struct Token { 
@@ -102,10 +96,10 @@ namespace photon {
             TokenType type;
 
             /// @brief The token value
-            std::string lexeme;
+            std::string_view lexeme;
             
             /// @brief The token offset relative to the beggining of the source code
-            size_t offset;
+            std::size_t offset;
 
             /// @brief Allows for std::cout to print token informations
             friend std::ostream& operator <<(std::ostream& os, const Token& token) {
@@ -123,41 +117,41 @@ namespace photon {
         iterableBuffer<Token> internalBuffer;
         
         /// @brief Flushes the character buffer and the Token buffer of the preprocessor
-        void flushBuffers();
+        void flushBuffers() noexcept;
 
         // == Processing Utilites ==
 
         /// @brief Asserts that the given character is any entry of [a-zA-Z]
         /// @param c The character to check
-        [[nodiscard]] bool isLetter(const char c);
+        [[nodiscard]] constexpr bool isLetter(const char c) noexcept;
 
         /// @brief Asserts that the given character is any entry of [0-9]
         /// @param c The character to check
-        [[nodiscard]] bool isDigit(const char c);
+        [[nodiscard]] constexpr bool isDigit(const char c) noexcept;
 
         /// @brief Asserts that the given character is a symbol that cannot be combined with others
         /// @param c The character to check
-        [[nodiscard]] bool isSimpleSymbol(const char c);
+        [[nodiscard]] constexpr bool isSimpleSymbol(const char c) noexcept;
 
         /// @brief Asserts that the given character is a symbol that can be combined with others
         /// @param c The character to check
-        [[nodiscard]] bool isCombinableSymbol(const char c);
+        [[nodiscard]] constexpr bool isCombinableSymbol(const char c) noexcept;
 
         /// @brief Asserts that the given character is a generic symbol
         /// @param c The character to check 
-        [[nodiscard]] bool isGenericSymbol(const char c);
+        [[nodiscard]] constexpr bool isGenericSymbol(const char c) noexcept;
 
         /// @brief Creates a token containing a word
-        [[nodiscard]] Token createWordToken();
+        [[nodiscard]] Token createWordToken() noexcept;
 
         /// @brief Creates a token containing a number
-        [[nodiscard]] Token createNumberToken();
+        [[nodiscard]] Token createNumberToken() noexcept;
 
         /// @brief Creates a token containing a symbol
-        [[nodiscard]] Token createSymbolToken();
+        [[nodiscard]] Token createSymbolToken() noexcept;
 
         /// @brief Creates a token containing a textual constant (e.g : string or char) 
-        [[nodiscard]] Token createTextualConstantToken();
+        [[nodiscard]] Token createTextualConstantToken() noexcept;
 
     public:
         /// @brief A lexer payload, contains the processed token buffer for the parser to process
@@ -171,8 +165,7 @@ namespace photon {
         /// @param inputPayload The preprocessor output to process
         void process(Preprocessor::PreprocessorOutput inputPayload);
 
+        /// @brief Transfers the internal buffer over to a payload and flushes the internal buffers making the unit ready for a new stream
         LexerOutput buildOutput();
     };
 }
-
-#endif

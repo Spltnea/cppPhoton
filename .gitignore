@@ -17,6 +17,7 @@ _deps/
 # IDE / Editor configurations
 .vscode/
 .idea/
+.cache/
 *.swp
 *.swo
 *~

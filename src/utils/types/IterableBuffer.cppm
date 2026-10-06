@@ -1,48 +1,36 @@
-// AI Corrected
+module;
+export module IterableBuffer;
 
-#ifndef ITERABLE_BUFFER_HPP
-#define ITERABLE_BUFFER_HPP
-
-#include <vector>
-#include <initializer_list>
-#include <utility>
-
-#include <ranges>
-#include <stdexcept>
-#include <string>
-#include <cstdint>
-
-#include <span>
-#include <algorithm>
+import std;
 
 namespace photon {
 
     /// @brief A buffer whose contents can easily be iterated over, provides methods for secure and easy content pushing and popping
     /// @tparam T The data type stored in this buffer
-    template<class T>
+    export template<class T>
     class iterableBuffer {
     private:
         std::vector<T> data;
-        size_t idx{0};
+        std::size_t idx{0};
 
     public:
         // === Buffer's information gathering ===
 
         /// @brief Returns the size of the buffer
-        [[nodiscard]] size_t size() const { return data.size(); }
+        [[nodiscard]] std::size_t size() const { return data.size(); }
 
         /// @brief Asserts that the buffer is empty
         [[nodiscard]] bool isEmpty() const { return data.empty(); }
 
         /// @brief Returns the position of the index cursor
-        [[nodiscard]] size_t cursorPosition() const { return idx; }
+        [[nodiscard]] std::size_t cursorPosition() const { return idx; }
 
         /// @brief Returns the capacity of the buffer memory wise
-        [[nodiscard]] size_t capacity() const { return data.capacity(); }
+        [[nodiscard]] std::size_t capacity() const { return data.capacity(); }
 
         /// @brief Defines the minimum size of the buffer, allocates storage if necessary
         /// @param size The minimum size to define
-        void reserve(size_t size) { data.reserve(size); }
+        void reserve(std::size_t size) { data.reserve(size); }
             
         // === Safety methods ===
 
@@ -51,7 +39,7 @@ namespace photon {
 
         /// @brief Asserts that the given offset relative to the current index cursor is valid (e.g : Does not go out of bounds)
         /// @param offset The offset to test (idx + offset)
-        [[nodiscard]] bool isOffsetValid(size_t offset) const {
+        [[nodiscard]] bool isOffsetValid(std::size_t offset) const {
             return (isAtEnd()
                 ? false
                 : offset < (data.size() - idx));
@@ -59,7 +47,7 @@ namespace photon {
 
         /// @brief Asserts that the given offset is suitable for a cursor shift
         /// @param offset The offset to test (idx + offset)
-        [[nodiscard]] bool canAdvanceAtOffset(size_t offset) const {
+        [[nodiscard]] bool canAdvanceAtOffset(std::size_t offset) const {
             return offset <= (data.size() - idx); 
         }
 
@@ -67,7 +55,7 @@ namespace photon {
 
         /// @brief Advances the index cursor by an offset given it's valid (does not consume anything)
         /// @param offset The offset (default : 1)
-        void advance(size_t offset = 1) {
+        void advance(std::size_t offset = 1) {
             if (!canAdvanceAtOffset(offset)) { throw std::out_of_range("The given offset [" + std::to_string(offset) + "] goes out of bounds"); }
             idx += offset;
         }
@@ -127,7 +115,7 @@ namespace photon {
 
         /// @brief Returns the element pointed after an offset relative to the current cursor (does not increment the cursor), throws an exception if the offset leads to out of bounds positions
         /// @param offset The offset to look at
-        [[nodiscard]] const T& elementAfter(size_t offset = 1) const { 
+        [[nodiscard]] const T& elementAfter(std::size_t offset = 1) const { 
             return (isOffsetValid(offset) 
                 ?  data[idx + offset]
                 :  throw std::out_of_range("The given offset [" + std::to_string(offset) + "] goes out of bounds"));
@@ -187,13 +175,13 @@ namespace photon {
 
         /// @brief Returns a lightweight view over the remaining (unread) elements
         [[nodiscard]] std::span<const T> remaining() const noexcept {
-            const size_t safe_idx = std::min(idx, data.size());
+            const std::size_t safe_idx = std::min(idx, data.size());
             return std::span<const T>(data).subspan(safe_idx);
         }
 
         /// @brief Returns a mutable view over the remaining (unread) elements
         [[nodiscard]] std::span<T> remaining() noexcept {
-            const size_t safe_idx = std::min(idx, data.size());
+            const std::size_t safe_idx = std::min(idx, data.size());
             return std::span<T>(data).subspan(safe_idx);
         }
 
@@ -218,5 +206,3 @@ namespace photon {
         [[nodiscard]] auto cend() const noexcept { return data.cend(); }
     };
 }
-
-#endif
